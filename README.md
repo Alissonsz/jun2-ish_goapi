@@ -35,7 +35,7 @@ export interface Room {
   - params: `null`
   - response: `{ rooms: []Room }`
 - POST `/room`
-  - params: { name: string; videoUrl?: string }
-  - response: { room: Room }
+  - params: `{ name: string; videoUrl?: string }`
+  - response: `{ room: Room }`
 - GET `/room/{id}`
-  - response: { room: Room } or `404` if not found    
+  - response: `{ room: Room }` or `404` if not found    
