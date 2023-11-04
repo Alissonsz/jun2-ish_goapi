@@ -1,4 +1,4 @@
-package model
+package models
 
 type ChatMessage struct {
 	Id      int64  `db:"message_id" json:"id"`

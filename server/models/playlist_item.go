@@ -1,4 +1,4 @@
-package model
+package models
 
 type PlaylistItem struct {
 	Id       int64  `db:"playlist_item_id" json:"id"`
