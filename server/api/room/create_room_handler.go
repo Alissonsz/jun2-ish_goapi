@@ -20,7 +20,7 @@ func (h *CreateRoomHandler) Handle(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	err = h.Service.Create(*room)
+	_, err = h.Service.Create(*room)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return err

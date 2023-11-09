@@ -4,7 +4,7 @@ import "github.com/alissonsz/jun2-ish_goapi/server/models"
 
 type Service interface {
 	// Create a new room
-	Create(room PostPayload) error
+	Create(room PostPayload) (*int64, error)
 }
 
 type service struct {
@@ -17,7 +17,7 @@ func NewService(r repository) *service {
 	}
 }
 
-func (s *service) Create(room PostPayload) error {
+func (s *service) Create(room PostPayload) (*int64, error) {
 	return s.Repository.Create(&models.Room{
 		Name:     room.Name,
 		VideoUrl: room.VideoUrl,
