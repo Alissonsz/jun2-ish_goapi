@@ -1,5 +1,7 @@
 package room
 
+//go:generate mockery --name=repository --structname=RepositoryMock --inpackage --filename=repository_mock.go
+
 import (
 	"encoding/json"
 	"fmt"
@@ -9,7 +11,7 @@ import (
 )
 
 type repository interface {
-	Create(room *models.Room) error
+	Create(room *models.Room) (*int64, error)
 }
 
 type repositoryDB struct {
@@ -20,12 +22,17 @@ func NewRepository(dbConn *sqlx.DB) *repositoryDB {
 	return &repositoryDB{db: dbConn}
 }
 
-func (r *repositoryDB) Create(room *models.Room) error {
+func (r *repositoryDB) Create(room *models.Room) (*int64, error) {
 	rawRoom, _ := json.Marshal(room)
 
 	fmt.Println("Creating room...")
 	fmt.Printf("%s \n", rawRoom)
-	return nil
 
-	// should call r.db.Exec(insertQuery, room.Name, room.VideoUrl, room.Playing, room.Progress) here
+	var roomId int64
+	err := r.db.QueryRowx(insertQuery, room.Name, room.VideoUrl, room.Playing, room.Progress).Scan(&roomId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &roomId, err
 }
