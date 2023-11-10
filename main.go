@@ -9,7 +9,13 @@ import (
 )
 
 func main() {
-	dbConn, err := database.Setup()
+	dbCfg := database.ClientConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "mysecretpassword",
+		Dbname:   "jun2-ish_db"}
+	dbConn, err := database.Setup(dbCfg)
 
 	if err != nil {
 		panic(err)

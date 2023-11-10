@@ -16,7 +16,14 @@ type RepositoryTestSuite struct {
 }
 
 func (s *RepositoryTestSuite) SetupTest() {
-	testDb, err := database.CreateTestDb()
+	dbCfg := database.ClientConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "mysecretpassword",
+		Dbname:   "jun2-ish_test_db"}
+
+	testDb, err := database.Setup(dbCfg)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

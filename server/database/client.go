@@ -7,6 +7,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type ClientConfig struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Dbname   string
+}
+
 const (
 	host     = "localhost"
 	port     = 5432
@@ -15,10 +23,10 @@ const (
 	dbname   = "jun2-ish_db"
 )
 
-func Setup() (*sqlx.DB, error) {
+func Setup(cfg ClientConfig) (*sqlx.DB, error) {
 	psqlInfo := fmt.Sprintf("sslmode=disable host=%s port=%d user=%s "+
 		"password=%s dbname=%s",
-		host, port, user, password, dbname)
+		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Dbname)
 
 	db, err := sqlx.Connect("postgres", psqlInfo)
 	if err != nil {
