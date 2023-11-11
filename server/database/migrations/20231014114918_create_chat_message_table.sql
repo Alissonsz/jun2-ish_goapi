@@ -7,8 +7,8 @@ CREATE TABLE chat_message (
   content TEXT NOT NULL,
   room_id INTEGER NOT NULL,
   CONSTRAINT FK_chat_message_room FOREIGN KEY (room_id) REFERENCES room (room_id),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
   deleted_at TIMESTAMP
 );
 -- +goose StatementEnd

@@ -20,11 +20,20 @@ func (h *CreateRoomHandler) Handle(w http.ResponseWriter, r *http.Request) error
 		return err
 	}
 
-	_, err = h.Service.Create(*room)
+	createdRoom, err := h.Service.Create(*room)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return err
 	}
+
+	createdRoomJson, err := json.Marshal(createdRoom)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return err
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(createdRoomJson))
 
 	return nil
 }

@@ -7,8 +7,8 @@ CREATE TABLE playlist_item (
   video_url VARCHAR(255) NOT NULL,
   name VARCHAR(255),
   CONSTRAINT FK_playlist_item_room FOREIGN KEY (room_id) REFERENCES room (room_id),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
   deleted_at TIMESTAMP
 );
 -- +goose StatementEnd

@@ -34,6 +34,15 @@ func ConfigureRoutes(server *Server, dbConn *sqlx.DB, roomService roomService.Se
 		}
 	})
 
+	server.router.Get("/room/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handler := &roomHandler.GetRoomByIdHandler{Service: roomService}
+		err := handler.Handle(w, r)
+
+		if err != nil {
+			fmt.Printf("error: %v", err)
+		}
+	})
+
 	server.router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {

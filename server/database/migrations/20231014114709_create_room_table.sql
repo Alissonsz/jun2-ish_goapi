@@ -7,8 +7,8 @@ CREATE TABLE room (
   video_url VARCHAR(255),
   playing BOOLEAN NOT NULL DEFAULT FALSE,
   progress FLOAT DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
   deleted_at TIMESTAMP
 );
 -- +goose StatementEnd

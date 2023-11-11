@@ -8,4 +8,11 @@ INSERT INTO room
   (name, video_url, playing, progress)
 VALUES
   ($1, $2, $3, $4)
-RETURNING room_id;
+RETURNING 
+  room_id,
+  name,
+  video_url,
+  playing,
+  progress,
+  created_at,
+  updated_at;

@@ -13,24 +13,50 @@ type RepositoryMock struct {
 }
 
 // Create provides a mock function with given fields: room
-func (_m *RepositoryMock) Create(room *models.Room) (*int64, error) {
+func (_m *RepositoryMock) Create(room *models.Room) (*models.Room, error) {
 	ret := _m.Called(room)
 
-	var r0 *int64
+	var r0 *models.Room
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*models.Room) (*int64, error)); ok {
+	if rf, ok := ret.Get(0).(func(*models.Room) (*models.Room, error)); ok {
 		return rf(room)
 	}
-	if rf, ok := ret.Get(0).(func(*models.Room) *int64); ok {
+	if rf, ok := ret.Get(0).(func(*models.Room) *models.Room); ok {
 		r0 = rf(room)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*int64)
+			r0 = ret.Get(0).(*models.Room)
 		}
 	}
 
 	if rf, ok := ret.Get(1).(func(*models.Room) error); ok {
 		r1 = rf(room)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetById provides a mock function with given fields: id
+func (_m *RepositoryMock) GetById(id int64) (*models.Room, error) {
+	ret := _m.Called(id)
+
+	var r0 *models.Room
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) (*models.Room, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(int64) *models.Room); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Room)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
