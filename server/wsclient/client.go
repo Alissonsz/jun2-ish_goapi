@@ -14,6 +14,7 @@ var upgrader = websocket.Upgrader{}
 type Client struct {
 	Id   string
 	Conn *websocket.Conn
+	send chan []byte
 }
 
 type DataMessage struct {
@@ -22,12 +23,13 @@ type DataMessage struct {
 }
 
 type WSClient struct {
-	clients  []*Client
-	register chan *Client
+	clients   []*Client
+	register  chan *Client
+	broadcast chan []byte
 }
 
 func NewWSClient() *WSClient {
-	wsClient := &WSClient{clients: []*Client{}, register: make(chan *Client)}
+	wsClient := &WSClient{clients: []*Client{}, register: make(chan *Client), broadcast: make(chan []byte)}
 	go wsClient.registerChannels()
 	return wsClient
 }
@@ -39,17 +41,43 @@ func (c *WSClient) UpgradeAndRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newClient := &Client{Id: uuid.NewString(), Conn: conn}
+	newClient := &Client{Id: uuid.NewString(), Conn: conn, send: make(chan []byte)}
 	c.register <- newClient
+}
 
+func (c *WSClient) addClient(client *Client) {
+	c.clients = append(c.clients, client)
+}
+
+func (c *WSClient) registerChannels() {
+	go c.broadcastPump()
+
+	for client := range c.register {
+		c.addClient(client)
+		go client.readPump(c)
+		go client.writePump()
+		client.send <- []byte("Welcome to the chat!")
+		c.broadcast <- []byte(fmt.Sprintf("User %s joined the chat!", client.Id))
+	}
+}
+
+func (c *WSClient) broadcastPump() {
+	for message := range c.broadcast {
+		for _, client := range c.clients {
+			client.send <- message
+		}
+	}
+}
+
+func (c *Client) readPump(room *WSClient) {
 	for {
-		_, message, err := conn.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				fmt.Printf("error: %v", err)
 			}
 			fmt.Print("Client disconnected \n")
-			conn.Close()
+			c.Conn.Close()
 			break
 		}
 
@@ -57,43 +85,19 @@ func (c *WSClient) UpgradeAndRegister(w http.ResponseWriter, r *http.Request) {
 		json.Unmarshal(message, &parsedMessage)
 
 		if parsedMessage.Type == "message" {
-			writer, err := conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				fmt.Printf("error: %v", err)
-			}
-
-			writer.Write([]byte("You said: " + parsedMessage.Data))
-			writer.Close()
+			room.broadcast <- []byte(fmt.Sprintf("User %s: %s", c.Id, parsedMessage.Data))
 		}
 	}
 }
 
-func (c *WSClient) addClient(client *Client) {
-	c.clients = append(c.clients, client)
-}
-
-func (c *WSClient) notifyNewUser(client *Client) {
-	for _, roomClient := range c.clients {
-		if roomClient.Id != client.Id {
-			roomClient.sendMessage(fmt.Sprintf("New user joined the chat! Id: %s", client.Id))
+func (c *Client) writePump() {
+	for message := range c.send {
+		writer, err := c.Conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			fmt.Printf("error: %v", err)
 		}
-	}
-}
 
-func (c *Client) sendMessage(message string) {
-	writer, err := c.Conn.NextWriter(websocket.TextMessage)
-	if err != nil {
-		fmt.Printf("error: %v", err)
-	}
-
-	writer.Write([]byte(message))
-	writer.Close()
-}
-
-func (c *WSClient) registerChannels() {
-	for client := range c.register {
-		c.addClient(client)
-		client.sendMessage("Welcome to the chat!")
-		c.notifyNewUser(client)
+		writer.Write(message)
+		writer.Close()
 	}
 }
