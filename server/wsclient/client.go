@@ -56,8 +56,8 @@ func (c *WSClient) registerChannels() {
 		c.addClient(client)
 		go client.readPump(c)
 		go client.writePump()
-		client.send <- []byte("Welcome to the chat!")
-		c.broadcast <- []byte(fmt.Sprintf("User %s joined the chat!", client.Id))
+		client.send <- []byte("Welcome to the room!")
+		c.broadcast <- []byte(fmt.Sprintf("User %s joined the room!", client.Id))
 	}
 }
 
@@ -76,8 +76,8 @@ func (c *Client) readPump(room *WSClient) {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				fmt.Printf("error: %v", err)
 			}
-			fmt.Print("Client disconnected \n")
-			c.Conn.Close()
+
+			room.removeClient(c)
 			break
 		}
 
@@ -94,10 +94,22 @@ func (c *Client) writePump() {
 	for message := range c.send {
 		writer, err := c.Conn.NextWriter(websocket.TextMessage)
 		if err != nil {
-			fmt.Printf("error: %v", err)
+			fmt.Printf("error: %v \n", err)
 		}
 
 		writer.Write(message)
 		writer.Close()
+	}
+}
+
+func (c *WSClient) removeClient(clientToRemove *Client) {
+	for i, client := range c.clients {
+		if client.Id == clientToRemove.Id {
+			clientToRemove.Conn.Close()
+			close(clientToRemove.send)
+			c.clients = append(c.clients[:i], c.clients[i+1:]...)
+			c.broadcast <- []byte(fmt.Sprintf("User %s left the room!", clientToRemove.Id))
+			break
+		}
 	}
 }
