@@ -10,6 +10,7 @@ import (
 type repository interface {
 	Create(room *models.Room) (*models.Room, error)
 	GetById(id int64) (*models.Room, error)
+	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 }
 
 type repositoryDB struct {
@@ -40,4 +41,15 @@ func (r *repositoryDB) GetById(id int64) (*models.Room, error) {
 	}
 
 	return &room, err
+}
+
+func (r *repositoryDB) CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error) {
+	var createdMessage models.ChatMessage
+	err := r.db.QueryRowx(insertChatMessageQuery, roomId, message.Author, message.Content).StructScan(&createdMessage)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &createdMessage, err
 }

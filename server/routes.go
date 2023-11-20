@@ -12,7 +12,7 @@ import (
 )
 
 func ConfigureRoutes(server *Server, dbConn *sqlx.DB, roomService roomService.Service) {
-	wsClient := wsclient.NewWSClient()
+	wsClient := wsclient.NewWSClient(roomService)
 
 	server.router.Use(middleware.Logger)
 	server.router.Get("/", func(w http.ResponseWriter, r *http.Request) {

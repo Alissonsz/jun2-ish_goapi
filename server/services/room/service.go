@@ -7,6 +7,8 @@ type Service interface {
 	Create(room PostPayload) (*models.Room, error)
 	// Get a room by its id
 	GetById(id int64) (*models.Room, error)
+	// Save a chat message
+	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 }
 
 type service struct {
@@ -30,4 +32,8 @@ func (s *service) Create(room PostPayload) (*models.Room, error) {
 
 func (s *service) GetById(id int64) (*models.Room, error) {
 	return s.Repository.GetById(id)
+}
+
+func (s *service) CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error) {
+	return s.Repository.CreateChatMessage(roomId, message)
 }

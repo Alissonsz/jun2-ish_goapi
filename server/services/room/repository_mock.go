@@ -38,6 +38,32 @@ func (_m *RepositoryMock) Create(room *models.Room) (*models.Room, error) {
 	return r0, r1
 }
 
+// CreateChatMessage provides a mock function with given fields: roomId, message
+func (_m *RepositoryMock) CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error) {
+	ret := _m.Called(roomId, message)
+
+	var r0 *models.ChatMessage
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *models.ChatMessage) (*models.ChatMessage, error)); ok {
+		return rf(roomId, message)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *models.ChatMessage) *models.ChatMessage); ok {
+		r0 = rf(roomId, message)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.ChatMessage)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *models.ChatMessage) error); ok {
+		r1 = rf(roomId, message)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetById provides a mock function with given fields: id
 func (_m *RepositoryMock) GetById(id int64) (*models.Room, error) {
 	ret := _m.Called(id)

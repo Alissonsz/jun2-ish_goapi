@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/alissonsz/jun2-ish_goapi/server/services/room"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -17,19 +18,15 @@ type Client struct {
 	send chan []byte
 }
 
-type DataMessage struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
-
 type WSClient struct {
-	clients   []*Client
-	register  chan *Client
-	broadcast chan []byte
+	roomService room.Service
+	clients     []*Client
+	register    chan *Client
+	broadcast   chan []byte
 }
 
-func NewWSClient() *WSClient {
-	wsClient := &WSClient{clients: []*Client{}, register: make(chan *Client), broadcast: make(chan []byte)}
+func NewWSClient(roomService room.Service) *WSClient {
+	wsClient := &WSClient{roomService: roomService, clients: []*Client{}, register: make(chan *Client), broadcast: make(chan []byte)}
 	go wsClient.registerChannels()
 	return wsClient
 }
@@ -69,6 +66,18 @@ func (c *WSClient) broadcastPump() {
 	}
 }
 
+func (c *WSClient) removeClient(clientToRemove *Client) {
+	for i, client := range c.clients {
+		if client.Id == clientToRemove.Id {
+			clientToRemove.Conn.Close()
+			close(clientToRemove.send)
+			c.clients = append(c.clients[:i], c.clients[i+1:]...)
+			c.broadcast <- []byte(fmt.Sprintf("User %s left the room!", clientToRemove.Id))
+			break
+		}
+	}
+}
+
 func (c *Client) readPump(room *WSClient) {
 	for {
 		_, message, err := c.Conn.ReadMessage()
@@ -84,9 +93,7 @@ func (c *Client) readPump(room *WSClient) {
 		parsedMessage := DataMessage{}
 		json.Unmarshal(message, &parsedMessage)
 
-		if parsedMessage.Type == "message" {
-			room.broadcast <- []byte(fmt.Sprintf("User %s: %s", c.Id, parsedMessage.Data))
-		}
+		room.handleMessage(parsedMessage)
 	}
 }
 
@@ -99,17 +106,5 @@ func (c *Client) writePump() {
 
 		writer.Write(message)
 		writer.Close()
-	}
-}
-
-func (c *WSClient) removeClient(clientToRemove *Client) {
-	for i, client := range c.clients {
-		if client.Id == clientToRemove.Id {
-			clientToRemove.Conn.Close()
-			close(clientToRemove.send)
-			c.clients = append(c.clients[:i], c.clients[i+1:]...)
-			c.broadcast <- []byte(fmt.Sprintf("User %s left the room!", clientToRemove.Id))
-			break
-		}
 	}
 }

@@ -74,6 +74,26 @@ func (s *RepositoryTestSuite) TestRoomRepository() {
 		s.Equal(room.Playing, insertedRoom.Playing)
 		s.Equal(room.Progress, insertedRoom.Progress)
 	})
+
+	s.Run("Create chat message", func() {
+		s.T().Parallel()
+		r := NewRepository(s.db)
+
+		room, err := s.buildRoom()
+		s.NoError(err)
+
+		chatMessage := &models.ChatMessage{
+			Author:  "test",
+			Content: "test message",
+		}
+
+		createdMessage, err := r.CreateChatMessage(room.Id, chatMessage)
+		s.NoError(err)
+
+		s.Equal(chatMessage.Author, createdMessage.Author)
+		s.Equal(chatMessage.Content, createdMessage.Content)
+		s.Equal(room.Id, createdMessage.RoomId)
+	})
 }
 
 func TestSuit(t *testing.T) {

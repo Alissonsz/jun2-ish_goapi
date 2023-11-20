@@ -3,7 +3,7 @@
 SELECT 'up SQL query';
 CREATE TABLE chat_message (
   chat_message_id SERIAL PRIMARY KEY,
-  author INTEGER NOT NULL,
+  author VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
   room_id INTEGER NOT NULL,
   CONSTRAINT FK_chat_message_room FOREIGN KEY (room_id) REFERENCES room (room_id),
