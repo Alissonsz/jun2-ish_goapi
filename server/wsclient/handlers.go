@@ -17,31 +17,31 @@ type UserMessage struct {
 	Content string `json:"content"`
 }
 
-func (c *WSClient) handleMessage(message DataMessage) {
+func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 	switch message.Type {
-	case "message":
+	case "newMessage":
 		userMessage := UserMessage{}
 		err := json.Unmarshal(message.Data, &userMessage)
 
 		if err != nil {
 			fmt.Printf("error: %v", err)
 		} else {
-			c.handleChatMessage(userMessage)
+			wsRoom.handleChatMessage(userMessage)
 		}
 	}
 }
 
-func (c *WSClient) handleChatMessage(message UserMessage) {
+func (wsRoom *wsRoom) handleChatMessage(message UserMessage) {
 	chatMessage := &models.ChatMessage{
 		Author:  message.Author,
 		Content: message.Content,
 	}
 
-	createdMessage, err := c.roomService.CreateChatMessage(1, chatMessage)
+	createdMessage, err := wsRoom.roomService.CreateChatMessage(wsRoom.Id, chatMessage)
 	if err != nil {
 		fmt.Printf("error: %v", err)
 		return
 	}
 
-	c.broadcast <- []byte(fmt.Sprintf("%s: %s", createdMessage.Author, createdMessage.Content))
+	wsRoom.broadcast <- []byte(fmt.Sprintf("%s: %s", createdMessage.Author, createdMessage.Content))
 }
