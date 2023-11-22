@@ -3,6 +3,7 @@ package wsclient
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/alissonsz/jun2-ish_goapi/server/services/room"
@@ -22,13 +23,21 @@ type joinRoom struct {
 	Nickname string `json:"nickname"`
 }
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
 func NewWsHub(roomService room.Service) *Hub {
 	return &Hub{roomService: roomService, rooms: []*wsRoom{}}
 }
 
 func (h *Hub) UpgradeAndRegister(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -46,11 +55,19 @@ func (h *Hub) UpgradeAndRegister(w http.ResponseWriter, r *http.Request) {
 		}
 
 		parsedMessage := DataMessage{}
-		json.Unmarshal(message, &parsedMessage)
+		err = json.Unmarshal(message, &parsedMessage)
+		if err != nil {
+			fmt.Printf("error: %v", err)
+			continue
+		}
 
 		if parsedMessage.Type == "joinRoom" {
 			joinRoom := joinRoom{}
-			json.Unmarshal(parsedMessage.Data, &joinRoom)
+			err := json.Unmarshal(parsedMessage.Data, &joinRoom)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				continue
+			}
 
 			h.addClientToRoom(newClient, joinRoom.RoomId)
 			break

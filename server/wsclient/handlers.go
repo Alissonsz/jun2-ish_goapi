@@ -28,6 +28,8 @@ func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 		} else {
 			wsRoom.handleChatMessage(userMessage)
 		}
+	default:
+		fmt.Println(message)
 	}
 }
 

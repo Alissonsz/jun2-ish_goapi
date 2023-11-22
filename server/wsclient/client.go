@@ -7,8 +7,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
-
 type Client struct {
 	Id   string
 	Conn *websocket.Conn
