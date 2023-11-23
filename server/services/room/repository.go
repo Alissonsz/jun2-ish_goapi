@@ -40,6 +40,13 @@ func (r *repositoryDB) GetById(id int64) (*models.Room, error) {
 		return nil, err
 	}
 
+	chatMessages, err := r.getChatMessages(id)
+	if err != nil {
+		return nil, err
+	}
+
+	room.Messages = chatMessages
+
 	return &room, err
 }
 
@@ -52,4 +59,15 @@ func (r *repositoryDB) CreateChatMessage(roomId int64, message *models.ChatMessa
 	}
 
 	return &createdMessage, err
+}
+
+func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, error) {
+	messages := []models.ChatMessage{}
+	err := r.db.Select(&messages, getChatMessagesQuery, roomId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, err
 }

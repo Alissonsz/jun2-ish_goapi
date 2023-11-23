@@ -27,13 +27,20 @@ func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 			fmt.Printf("error: %v", err)
 		} else {
 			wsRoom.handleChatMessage(userMessage)
+
+			jsonMessage, err := json.Marshal(message)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+			}
+
+			wsRoom.broadcast <- []byte(jsonMessage)
 		}
 	default:
 		fmt.Println(message)
 	}
 }
 
-func (wsRoom *wsRoom) handleChatMessage(message UserMessage) {
+func (wsRoom *wsRoom) handleChatMessage(message UserMessage) error {
 	chatMessage := &models.ChatMessage{
 		Author:  message.Author,
 		Content: message.Content,
@@ -42,8 +49,9 @@ func (wsRoom *wsRoom) handleChatMessage(message UserMessage) {
 	createdMessage, err := wsRoom.roomService.CreateChatMessage(wsRoom.Id, chatMessage)
 	if err != nil {
 		fmt.Printf("error: %v", err)
-		return
+		return err
 	}
 
 	wsRoom.broadcast <- []byte(fmt.Sprintf("%s: %s", createdMessage.Author, createdMessage.Content))
+	return nil
 }
