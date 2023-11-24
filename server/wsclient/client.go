@@ -4,13 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/alissonsz/jun2-ish_goapi/server/models"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	Id   string
-	Conn *websocket.Conn
-	send chan []byte
+	Id       string
+	Nickname string
+	Conn     *websocket.Conn
+	send     chan []byte
+}
+
+type videoStateMessage struct {
+	Type string `json:"type"`
+	Data struct {
+		Progress float64 `json:"progress"`
+		Playing  bool    `json:"playing"`
+	} `json:"data"`
 }
 
 func (c *Client) readPump(room *wsRoom) {
@@ -42,4 +52,18 @@ func (c *Client) writePump() {
 		writer.Write(message)
 		writer.Close()
 	}
+}
+
+func (c *Client) emitVideoState(room *models.Room) {
+	videoState := &videoStateMessage{}
+	videoState.Type = "videoState"
+	videoState.Data.Playing = room.Playing
+	videoState.Data.Progress = room.Progress
+
+	jsonMessage, err := json.Marshal(videoState)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+	}
+
+	c.send <- []byte(jsonMessage)
 }

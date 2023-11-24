@@ -69,6 +69,8 @@ func (h *Hub) UpgradeAndRegister(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
+			newClient.Nickname = joinRoom.Nickname
+
 			h.addClientToRoom(newClient, joinRoom.RoomId)
 			break
 		}

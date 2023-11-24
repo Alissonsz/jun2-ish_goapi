@@ -11,6 +11,7 @@ type repository interface {
 	Create(room *models.Room) (*models.Room, error)
 	GetById(id int64) (*models.Room, error)
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
+	Update(room *models.Room) (*models.Room, error)
 }
 
 type repositoryDB struct {
@@ -59,6 +60,17 @@ func (r *repositoryDB) CreateChatMessage(roomId int64, message *models.ChatMessa
 	}
 
 	return &createdMessage, err
+}
+
+func (r *repositoryDB) Update(room *models.Room) (*models.Room, error) {
+	var updatedRoom models.Room
+	err := r.db.QueryRowx(updateQuery, room.Id, room.Name, room.VideoUrl, room.Playing, room.Progress).StructScan(&updatedRoom)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedRoom, err
 }
 
 func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, error) {

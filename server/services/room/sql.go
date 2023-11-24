@@ -11,4 +11,6 @@ var (
 	insertChatMessageQuery string
 	//go:embed sql/get_chat_messages.sql
 	getChatMessagesQuery string
+	//go:embed sql/update.sql
+	updateQuery string
 )

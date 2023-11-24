@@ -75,6 +75,32 @@ func (s *RepositoryTestSuite) TestRoomRepository() {
 		s.Equal(room.Progress, insertedRoom.Progress)
 	})
 
+	s.Run("Update", func() {
+		s.T().Parallel()
+		r := NewRepository(s.db)
+
+		room, err := s.buildRoom()
+		s.NoError(err)
+
+		updatedVideoUrl := "youtube.com/updated"
+
+		room.Name = "updated name"
+		room.VideoUrl = &updatedVideoUrl
+		room.Playing = true
+
+		_, err = r.Update(room)
+		s.NoError(err)
+
+		updatedRoomRetrieved, err := r.GetById(room.Id)
+		s.NoError(err)
+
+		s.Equal(room.Id, updatedRoomRetrieved.Id)
+		s.Equal(room.Name, updatedRoomRetrieved.Name)
+		s.Equal(room.VideoUrl, updatedRoomRetrieved.VideoUrl)
+		s.Equal(room.Playing, updatedRoomRetrieved.Playing)
+		s.Equal(room.Progress, updatedRoomRetrieved.Progress)
+	})
+
 	s.Run("Create chat message", func() {
 		s.T().Parallel()
 		r := NewRepository(s.db)

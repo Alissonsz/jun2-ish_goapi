@@ -7,6 +7,8 @@ type Service interface {
 	Create(room PostPayload) (*models.Room, error)
 	// Get a room by its id
 	GetById(id int64) (*models.Room, error)
+	// Update a room
+	Update(room *models.Room) (*models.Room, error)
 	// Save a chat message
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 }
@@ -32,6 +34,10 @@ func (s *service) Create(room PostPayload) (*models.Room, error) {
 
 func (s *service) GetById(id int64) (*models.Room, error) {
 	return s.Repository.GetById(id)
+}
+
+func (s *service) Update(room *models.Room) (*models.Room, error) {
+	return s.Repository.Update(room)
 }
 
 func (s *service) CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error) {

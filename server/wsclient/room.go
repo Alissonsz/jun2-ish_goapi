@@ -1,6 +1,7 @@
 package wsclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -14,6 +15,13 @@ type wsRoom struct {
 	clients     []*Client
 	register    chan *Client
 	broadcast   chan []byte
+}
+
+type newUserJoinedMessage struct {
+	Type string `json:"type"`
+	Data struct {
+		Nickname string `json:"progress"`
+	} `json:"data"`
 }
 
 func NewWsRoom(id int64, roomService room.Service) *wsRoom {
@@ -54,7 +62,15 @@ func (wsRoom *wsRoom) registerChannels() {
 			go client.readPump(wsRoom)
 			go client.writePump()
 			client.send <- []byte("Welcome to the room!")
-			wsRoom.broadcast <- []byte(fmt.Sprintf("User %s joined the room!", client.Id))
+
+			roomData, err := wsRoom.roomService.GetById(wsRoom.Id)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				return
+			}
+
+			wsRoom.emitNewUserJoined(client)
+			client.emitVideoState(roomData)
 
 			fmt.Printf("New client joined room %d, now %d clients \n", wsRoom.Id, len(wsRoom.clients))
 		}
@@ -79,4 +95,52 @@ func (wsRoom *wsRoom) removeClient(clientToRemove *Client) {
 			break
 		}
 	}
+}
+
+func (wsRoom *wsRoom) emitNewUserJoined(client *Client) {
+	message := &newUserJoinedMessage{Type: "newUserJoined"}
+	message.Data.Nickname = client.Nickname
+
+	jsonMessage, err := json.Marshal(message)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
+
+	wsRoom.broadcast <- []byte(jsonMessage)
+}
+
+func (wsRoom *wsRoom) emitVideoPlayingChanged(message *VideoPlayingChangedMessage) {
+	type videoPlayingChangedMessage struct {
+		Type string `json:"type"`
+		Data struct {
+			Progress float64 `json:"progress"`
+			Playing  bool    `json:"playing"`
+		} `json:"data"`
+	}
+
+	jsonMessage, err := json.Marshal(&videoPlayingChangedMessage{Type: "videoPlayingChanged", Data: *message})
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
+
+	wsRoom.broadcast <- []byte(jsonMessage)
+}
+
+func (wsRoom *wsRoom) emitVideoChanged(message *ChangeVideoMessage) {
+	type videoChangedMessage struct {
+		Type string `json:"type"`
+		Data struct {
+			VideoUrl string `json:"videoUrl"`
+		} `json:"data"`
+	}
+
+	jsonMessage, err := json.Marshal(&videoChangedMessage{Type: "videoChanged", Data: *message})
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
+
+	wsRoom.broadcast <- []byte(jsonMessage)
 }
