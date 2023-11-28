@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/alissonsz/jun2-ish_goapi/server"
 	"github.com/alissonsz/jun2-ish_goapi/server/database"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	dbCfg := database.ClientConfig{
-		Host:     "localhost",
+		Host:     os.Getenv("DB_HOST"),
 		Port:     5432,
 		User:     "postgres",
 		Password: "mysecretpassword",

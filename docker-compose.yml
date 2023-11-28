@@ -1,0 +1,27 @@
+version: '3.1'
+services:
+  api:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+    links:
+      - db
+  db:
+    image: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: postgres
+      POSTGRES_DB: jun2-ish_db
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+volumes:
+  pgdata:
+

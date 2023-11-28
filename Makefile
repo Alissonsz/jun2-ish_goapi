@@ -2,7 +2,7 @@ create-migration:
 	goose -dir "server/database/migrations" create $(name) sql
 
 run-migrations:
-	goose -dir "server/database/migrations" postgres "user=postgres password=mysecretpassword dbname=jun2-ish_db sslmode=disable host=localhost" up
+	goose -dir "server/database/migrations" postgres "user=postgres password=mysecretpassword dbname=jun2-ish_db sslmode=disable host=${DB_HOST}" up
 
 run-migrations-test:
 	goose -dir "server/database/migrations" postgres "user=postgres password=mysecretpassword dbname=jun2-ish_test_db sslmode=disable host=localhost" up
