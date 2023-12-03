@@ -12,7 +12,6 @@ type repository interface {
 	GetById(id int64) (*models.Room, error)
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 	Update(room *models.Room) (*models.Room, error)
-	CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error)
 }
 
 type repositoryDB struct {
@@ -49,13 +48,6 @@ func (r *repositoryDB) GetById(id int64) (*models.Room, error) {
 
 	room.Messages = chatMessages
 
-	playlistItems, err := r.getPlaylistItems(id)
-	if err != nil {
-		return nil, err
-	}
-
-	room.PlaylistItems = playlistItems
-
 	return &room, err
 }
 
@@ -81,17 +73,6 @@ func (r *repositoryDB) Update(room *models.Room) (*models.Room, error) {
 	return &updatedRoom, err
 }
 
-func (r *repositoryDB) CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error) {
-	var createdItem models.PlaylistItem
-	err := r.db.QueryRowx(insertPlaylistItemQuery, roomId, item.VideoUrl, item.Name).StructScan(&createdItem)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &createdItem, err
-}
-
 func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, error) {
 	messages := []models.ChatMessage{}
 	err := r.db.Select(&messages, getChatMessagesQuery, roomId)
@@ -101,15 +82,4 @@ func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, erro
 	}
 
 	return messages, err
-}
-
-func (r *repositoryDB) getPlaylistItems(roomId int64) ([]models.PlaylistItem, error) {
-	items := []models.PlaylistItem{}
-	err := r.db.Select(&items, getPlaylistItemsQuery, roomId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return items, err
 }

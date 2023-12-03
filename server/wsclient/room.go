@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/alissonsz/jun2-ish_goapi/server/models"
 	"github.com/alissonsz/jun2-ish_goapi/server/services/room"
 	"github.com/google/uuid"
 )
@@ -138,33 +137,6 @@ func (wsRoom *wsRoom) emitVideoChanged(message *ChangeVideoMessage) {
 	}
 
 	jsonMessage, err := json.Marshal(&videoChangedMessage{Type: "videoChanged", Data: *message})
-	if err != nil {
-		fmt.Printf("error: %v", err)
-		return
-	}
-
-	wsRoom.broadcast <- []byte(jsonMessage)
-}
-
-func (wsRoom *wsRoom) emitAddedToPlaylist(playlistItem *models.PlaylistItem) {
-	type messageData struct {
-		Id       int64  `json:"id"`
-		Name     string `json:"name"`
-		VideoUrl string `json:"videoUrl"`
-	}
-
-	type addedToPlaylistMessage struct {
-		Type string      `json:"type"`
-		Data messageData `json:"data"`
-	}
-
-	data := &messageData{
-		Id:       playlistItem.Id,
-		Name:     playlistItem.Name,
-		VideoUrl: playlistItem.VideoUrl,
-	}
-
-	jsonMessage, err := json.Marshal(&addedToPlaylistMessage{Type: "addedToPlaylist", Data: *data})
 	if err != nil {
 		fmt.Printf("error: %v", err)
 		return

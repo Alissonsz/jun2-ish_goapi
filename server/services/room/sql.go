@@ -13,8 +13,4 @@ var (
 	getChatMessagesQuery string
 	//go:embed sql/update.sql
 	updateQuery string
-	//go:embed sql/insert_playlist_item.sql
-	insertPlaylistItemQuery string
-	//go:embed sql/get_playlist_items.sql
-	getPlaylistItemsQuery string
 )
