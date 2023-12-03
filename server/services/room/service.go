@@ -11,6 +11,8 @@ type Service interface {
 	Update(room *models.Room) (*models.Room, error)
 	// Save a chat message
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
+	// Save a playlist item
+	CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error)
 }
 
 type service struct {
@@ -42,4 +44,8 @@ func (s *service) Update(room *models.Room) (*models.Room, error) {
 
 func (s *service) CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error) {
 	return s.Repository.CreateChatMessage(roomId, message)
+}
+
+func (s *service) CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error) {
+	return s.Repository.CreatePlaylistItem(roomId, item)
 }
