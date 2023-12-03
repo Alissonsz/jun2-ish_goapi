@@ -30,6 +30,11 @@ type VideoSeekedMessage struct {
 	SeekTo float64 `json:"seekTo"`
 }
 
+type addVideoToPlaylistMessage struct {
+	VideoUrl string `json:"videoUrl"`
+	Name     string `json:"name"`
+}
+
 func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 	switch message.Type {
 	case "newMessage":
@@ -124,6 +129,22 @@ func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 
 			wsRoom.broadcast <- []byte(jsonMessage)
 		}
+	case "addVideoToPlaylist":
+		addVideoToPlaylistMessage := addVideoToPlaylistMessage{}
+
+		err := json.Unmarshal(message.Data, &addVideoToPlaylistMessage)
+		if err != nil {
+			fmt.Printf("error: %v", err)
+			return
+		}
+
+		playlistItem, err := wsRoom.roomService.CreatePlaylistItem(wsRoom.Id, &models.PlaylistItem{Name: addVideoToPlaylistMessage.Name, VideoUrl: addVideoToPlaylistMessage.VideoUrl})
+		if err != nil {
+			fmt.Printf("error: %v", err)
+			return
+		}
+
+		wsRoom.emitAddedToPlaylist(playlistItem)
 	default:
 		fmt.Println(message)
 	}
