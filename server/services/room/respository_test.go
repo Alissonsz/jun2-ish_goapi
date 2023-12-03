@@ -120,6 +120,27 @@ func (s *RepositoryTestSuite) TestRoomRepository() {
 		s.Equal(chatMessage.Content, createdMessage.Content)
 		s.Equal(room.Id, createdMessage.RoomId)
 	})
+
+	s.Run("Create playlist item", func() {
+		s.T().Parallel()
+		r := NewRepository(s.db)
+
+		room, err := s.buildRoom()
+		s.NoError(err)
+
+		playlistItem := &models.PlaylistItem{
+			VideoUrl: "test",
+			Name:     "test",
+			RoomId:   room.Id,
+		}
+
+		createdItem, err := r.CreatePlaylistItem(room.Id, playlistItem)
+		s.NoError(err)
+
+		s.Equal(playlistItem.VideoUrl, createdItem.VideoUrl)
+		s.Equal(playlistItem.Name, createdItem.Name)
+		s.Equal(room.Id, createdItem.RoomId)
+	})
 }
 
 func TestSuit(t *testing.T) {
