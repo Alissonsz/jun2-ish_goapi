@@ -13,6 +13,10 @@ type Service interface {
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 	// Save a playlist item
 	CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error)
+	// Delete a playlist item
+	DeletePlaylistItem(itemId int64) (*models.PlaylistItem, error)
+	// Get all playlist items
+	GetPlaylistItems(roomId int64) ([]models.PlaylistItem, error)
 }
 
 type service struct {
@@ -48,4 +52,12 @@ func (s *service) CreateChatMessage(roomId int64, message *models.ChatMessage) (
 
 func (s *service) CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error) {
 	return s.Repository.CreatePlaylistItem(roomId, item)
+}
+
+func (s *service) DeletePlaylistItem(itemId int64) (*models.PlaylistItem, error) {
+	return s.Repository.DeletePlaylistItem(itemId)
+}
+
+func (s *service) GetPlaylistItems(roomId int64) ([]models.PlaylistItem, error) {
+	return s.Repository.GetPlaylistItems(roomId)
 }

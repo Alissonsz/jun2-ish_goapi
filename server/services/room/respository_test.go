@@ -141,6 +141,36 @@ func (s *RepositoryTestSuite) TestRoomRepository() {
 		s.Equal(playlistItem.Name, createdItem.Name)
 		s.Equal(room.Id, createdItem.RoomId)
 	})
+
+	s.Run("Delete Playlist Item", func() {
+		s.T().Parallel()
+		r := NewRepository(s.db)
+
+		room, err := s.buildRoom()
+		s.NoError(err)
+
+		playlistItem := &models.PlaylistItem{
+			VideoUrl: "test",
+			Name:     "test",
+			RoomId:   room.Id,
+		}
+
+		_, err = r.CreatePlaylistItem(room.Id, playlistItem)
+		s.NoError(err)
+
+		createdItem, err := r.CreatePlaylistItem(room.Id, playlistItem)
+		s.NoError(err)
+
+		deletedItem, err := r.DeletePlaylistItem(createdItem.Id)
+		s.NoError(err)
+
+		s.NotNil(deletedItem.DeletedAt)
+
+		playlistItems, err := r.GetPlaylistItems(room.Id)
+		s.NoError(err)
+
+		s.NotContains(playlistItems, deletedItem)
+	})
 }
 
 func TestSuit(t *testing.T) {
