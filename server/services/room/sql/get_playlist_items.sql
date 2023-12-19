@@ -11,4 +11,6 @@ SELECT
   updated_at,
   deleted_at
 from playlist_item
-WHERE room_id = $1;
+WHERE room_id = $1
+AND deleted_at IS NULL
+ORDER BY created_at ASC;

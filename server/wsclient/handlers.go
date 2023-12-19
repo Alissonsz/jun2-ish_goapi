@@ -35,6 +35,10 @@ type addVideoToPlaylistMessage struct {
 	Name     string `json:"name"`
 }
 
+type playingProgressMessage struct {
+	Progress float64 `json:"progress"`
+}
+
 func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 	switch message.Type {
 	case "newMessage":
@@ -145,6 +149,51 @@ func (wsRoom *wsRoom) handleMessage(message DataMessage) {
 		}
 
 		wsRoom.emitAddedToPlaylist(playlistItem)
+	case "playNext":
+		playlist, err := wsRoom.roomService.GetPlaylistItems(wsRoom.Id)
+		if err != nil {
+			fmt.Printf("error: %v", err)
+			return
+		}
+
+		if len(playlist) > 0 {
+			nextPlaylistItem := &playlist[0]
+
+			nextPlaylistItem, err = wsRoom.roomService.DeletePlaylistItem(nextPlaylistItem.Id)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				return
+			}
+
+			wsRoom.emitPlayNext(nextPlaylistItem)
+			_, err := wsRoom.roomService.Update(&models.Room{Id: wsRoom.Id, VideoUrl: &nextPlaylistItem.VideoUrl, Progress: 0, Playing: true})
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				return
+			}
+		}
+	case "playingProgress":
+		playingProgressMessage := playingProgressMessage{}
+		err := json.Unmarshal(message.Data, &playingProgressMessage)
+
+		if err != nil {
+			fmt.Printf("error: %v", err)
+		} else {
+			room, err := wsRoom.roomService.GetById(wsRoom.Id)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				return
+			}
+
+			room.Progress = playingProgressMessage.Progress
+
+			_, err = wsRoom.roomService.Update(room)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+				return
+			}
+		}
+
 	default:
 		fmt.Println(message)
 	}

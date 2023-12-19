@@ -13,6 +13,8 @@ type repository interface {
 	CreateChatMessage(roomId int64, message *models.ChatMessage) (*models.ChatMessage, error)
 	Update(room *models.Room) (*models.Room, error)
 	CreatePlaylistItem(roomId int64, item *models.PlaylistItem) (*models.PlaylistItem, error)
+	DeletePlaylistItem(itemId int64) (*models.PlaylistItem, error)
+	GetPlaylistItems(roomId int64) ([]models.PlaylistItem, error)
 }
 
 type repositoryDB struct {
@@ -49,7 +51,7 @@ func (r *repositoryDB) GetById(id int64) (*models.Room, error) {
 
 	room.Messages = chatMessages
 
-	playlistItems, err := r.getPlaylistItems(id)
+	playlistItems, err := r.GetPlaylistItems(id)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +94,28 @@ func (r *repositoryDB) CreatePlaylistItem(roomId int64, item *models.PlaylistIte
 	return &createdItem, err
 }
 
+func (r *repositoryDB) DeletePlaylistItem(itemId int64) (*models.PlaylistItem, error) {
+	var deletedItem models.PlaylistItem
+	err := r.db.QueryRowx(deletePlaylistItemQuery, itemId).StructScan(&deletedItem)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &deletedItem, err
+}
+
+func (r *repositoryDB) GetPlaylistItems(roomId int64) ([]models.PlaylistItem, error) {
+	items := []models.PlaylistItem{}
+	err := r.db.Select(&items, getPlaylistItemsQuery, roomId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return items, err
+}
+
 func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, error) {
 	messages := []models.ChatMessage{}
 	err := r.db.Select(&messages, getChatMessagesQuery, roomId)
@@ -101,15 +125,4 @@ func (r *repositoryDB) getChatMessages(roomId int64) ([]models.ChatMessage, erro
 	}
 
 	return messages, err
-}
-
-func (r *repositoryDB) getPlaylistItems(roomId int64) ([]models.PlaylistItem, error) {
-	items := []models.PlaylistItem{}
-	err := r.db.Select(&items, getPlaylistItemsQuery, roomId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return items, err
 }

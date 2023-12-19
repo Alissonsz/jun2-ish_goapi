@@ -17,4 +17,6 @@ var (
 	insertPlaylistItemQuery string
 	//go:embed sql/get_playlist_items.sql
 	getPlaylistItemsQuery string
+	//go:embed sql/delete_playlist_item.sql
+	deletePlaylistItemQuery string
 )

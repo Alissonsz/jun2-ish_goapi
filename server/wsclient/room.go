@@ -172,3 +172,30 @@ func (wsRoom *wsRoom) emitAddedToPlaylist(playlistItem *models.PlaylistItem) {
 
 	wsRoom.broadcast <- []byte(jsonMessage)
 }
+
+func (wsRoom *wsRoom) emitPlayNext(playlistItem *models.PlaylistItem) {
+	type messageData struct {
+		Id       int64  `json:"id"`
+		Name     string `json:"name"`
+		VideoUrl string `json:"videoUrl"`
+	}
+
+	type playNextMessage struct {
+		Type string      `json:"type"`
+		Data messageData `json:"data"`
+	}
+
+	data := &messageData{
+		Id:       playlistItem.Id,
+		Name:     playlistItem.Name,
+		VideoUrl: playlistItem.VideoUrl,
+	}
+
+	jsonMessage, err := json.Marshal(&playNextMessage{Type: "playNext", Data: *data})
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
+
+	wsRoom.broadcast <- []byte(jsonMessage)
+}
