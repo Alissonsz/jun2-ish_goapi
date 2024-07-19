@@ -1,0 +1,40 @@
+# CORS Config Block Directive
+(cors) {
+  @cors_preflight{args[0]} {
+    method OPTIONS
+    header Origin {args[0]}
+  }
+  @cors{args[0]} header Origin {args[0]}
+
+  handle @cors_preflight{args[0]} {
+    header {
+      Access-Control-Allow-Origin "{args[0]}"
+      Access-Control-Allow-Credentials true
+      Access-Control-Allow-Headers "Authorization, Cache-Control, Content-Type"
+      Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE"
+      Access-Control-Max-Age "3600"
+      Vary Origin
+      defer
+    }
+    respond "" 204
+  }
+
+  handle @cors{args[0]} {
+    header {
+      Access-Control-Allow-Origin "{args[0]}"
+      Access-Control-Allow-Credentials true
+      Access-Control-Expose-Headers *
+      Vary Origin
+      defer
+    }
+  }
+}
+
+www.jun2-ish.fun {
+  redir https://jun2-ish.fun{uri}
+}
+
+jun2-ish.fun {
+  import cors *
+  reverse_proxy api:8080
+}

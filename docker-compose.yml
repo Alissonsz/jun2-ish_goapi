@@ -1,14 +1,16 @@
-version: '3.1'
+version: "3.1"
 services:
   webserver:
-    build:
-      context: ./nginx
+    image: caddy:2.8.4-alpine
+    restart: always
     ports:
       - 80:80
       - 443:443
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-    depends_on:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/caddy_data:/data
+      - $PWD/caddy_config:/config
+    links:
       - api
   api:
     build: .
@@ -20,6 +22,8 @@ services:
       DB_HOST: db
     links:
       - db
+    expose:
+      - 8080
   db:
     image: postgres
     volumes:
@@ -34,4 +38,6 @@ services:
       - 5432:5432
 volumes:
   pgdata:
-
+  caddy_data:
+    external: true
+  caddy_config:
