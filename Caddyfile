@@ -1,34 +1,26 @@
-# CORS Config Block Directive
+
 (cors) {
-  @cors_preflight{args[0]} {
-    method OPTIONS
-    header Origin {args[0]}
-  }
-  @cors{args[0]} header Origin {args[0]}
+        @cors_preflight{args.0} method OPTIONS
+        @cors{args.0} header Origin {args.0}
 
-  handle @cors_preflight{args[0]} {
-    header {
-      Access-Control-Allow-Origin "{args[0]}"
-      Access-Control-Allow-Credentials true
-      Access-Control-Allow-Headers "Authorization, Cache-Control, Content-Type"
-      Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE"
-      Access-Control-Max-Age "3600"
-      Vary Origin
-      defer
-    }
-    respond "" 204
-  }
+        handle @cors_preflight{args.0} {
+                header {
+                        Access-Control-Allow-Origin "{args.0}"
+                        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+                        Access-Control-Allow-Headers *
+                        Access-Control-Max-Age "3600"
+                        defer
+                }
+                respond "" 204
+        }
 
-  handle @cors{args[0]} {
-    header {
-      Access-Control-Allow-Origin "{args[0]}"
-      Access-Control-Allow-Credentials true
-      Access-Control-Expose-Headers *
-      Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE"
-      Vary Origin
-      defer
-    }
-  }
+        handle @cors{args.0} {
+                header {
+                        Access-Control-Allow-Origin "{args.0}"
+                        Access-Control-Expose-Headers *
+                        defer
+                }
+        }
 }
 
 www.jun2-ish.fun {
@@ -36,6 +28,7 @@ www.jun2-ish.fun {
 }
 
 jun2-ish.fun {
-  import cors *
+  import cors https://jun2-ish.vercel.app
   reverse_proxy api:8080
+  log
 }
