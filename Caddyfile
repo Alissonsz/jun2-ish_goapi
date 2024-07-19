@@ -24,6 +24,7 @@
       Access-Control-Allow-Origin "{args[0]}"
       Access-Control-Allow-Credentials true
       Access-Control-Expose-Headers *
+      Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE"
       Vary Origin
       defer
     }
